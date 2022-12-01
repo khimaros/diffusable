@@ -21,9 +21,9 @@ cd ~/src/huggingface.co/
 
 mkdir -p $USER/testmodel/
 
-cp <the ckpt files> $USER/model/
+cp <the ckpt files> $USER/testmodel/
 
 cp -r runwayml/stable-diffusion-v1-5/{feature_extractor,safety_checker,scheduler,text_encoder,tokenizer,unet,vae,model_index.json} $USER/testmodel/
 
-picklescan -p $USER/model/
+picklescan -p $USER/testmodel/
 ```

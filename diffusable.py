@@ -7,16 +7,19 @@ import toml
 
 parser = argparse.ArgumentParser(description='text to image with diffuser toolkit')
 parser.add_argument(
-        '-t', '--toml', metavar=('PATH', 'SECTION'), type=str, nargs=2,
-        help='toml file and section to load task parameters')
+        '-c', '--config', metavar='PATH', type=str, default='./diffusable.toml',
+        help='toml file to load task parameters from (default: "./diffusable.toml")')
+parser.add_argument(
+        '-t', '--tasks', action='append', default=[],
+        help='tasks from configuration file to execute')
 parser.add_argument(
         '-n', '--name', type=str,
-        help='base file name for generated images')
+        help='base file name to use for generated images')
 parser.add_argument(
         '-m', '--model', type=str, default='prompthero/openjourney',
         help='diffusion model to use for inference (default: "prompthero/openjourney")')
 parser.add_argument(
-        '-c', '--num_outputs', type=int, default=4,
+        '-p', '--num_outputs', type=int, default=4,
         help='number of images to generate per prompt (default: 4)')
 parser.add_argument(
         '-i', '--num_inference_steps', type=int, default=50,
@@ -43,6 +46,9 @@ parser.add_argument(
         '-o', '--output_dir', type=str, default='./output/',
         help='directory to write image output (default: "./output/")')
 parser.add_argument(
+        '--dump', action='store_true',
+        help='dump configuration and exit')
+parser.add_argument(
         '-x', '--negative_prompts', action='append',
         help='prompts to negate from the generated image')
 parser.add_argument(
@@ -50,45 +56,71 @@ parser.add_argument(
         help='prompt to generate images from')
 FLAGS = parser.parse_args()
 
-CONFIG = {}
+# voodoo magic to find explicitly defined flags
+FLAGS_SENTINEL = list()
+FLAGS_SENTINEL_NS = argparse.Namespace(**{ key: FLAGS_SENTINEL for key in vars(FLAGS) })
+parser.parse_args(namespace=FLAGS_SENTINEL_NS)
+EXPLICIT_FLAGS = vars(FLAGS_SENTINEL_NS).items()
 
-if FLAGS.toml:
-    toml_path, toml_section = FLAGS.toml
-    if os.path.exists(toml_path):
-        toml_data = toml.load(toml_path)
-        CONFIG = toml_data['DEFAULT']
-        CONFIG.update(toml_data[toml_section])
-        CONFIG['name'] = toml_section
+CONFIG = {'DEFAULT': {}}
+
+if FLAGS.config:
+    if os.path.exists(FLAGS.config):
+        print('[*] loading configuration from', FLAGS.config)
+        CONFIG = toml.load(FLAGS.config)
 
 
-def run():
+def task_config(task):
+    config = CONFIG['DEFAULT']
+    if task not in CONFIG:
+        print('[!] task not found in configuration file:', task)
+        return config
+    config.update(CONFIG[task])
+    config['name'] = task
+
     # calculate which flags were set explicitly and override config options
-    sentinel = object()
-    sentinel_ns = argparse.Namespace(**{ key: sentinel for key in vars(FLAGS) })
-    parser.parse_args(namespace=sentinel_ns)
-    for key, value in vars(sentinel_ns).items():
-        if key == 'prompts':
+    for key, value in EXPLICIT_FLAGS:
+        if key in ['config', 'tasks', 'prompts']:
             continue
-        if value is not sentinel:
-            CONFIG[key] = value
-        elif key not in CONFIG:
-            CONFIG[key] = getattr(FLAGS, key)
+        if value is not FLAGS_SENTINEL:
+            config[key] = value
+        elif key not in config:
+            config[key] = getattr(FLAGS, key)
 
-    #print('[*] using configuration:', CONFIG)
+    return config
 
-    if not CONFIG.get('prompts'):
-        print('[!] prompt must be defined in config or on command line')
+
+def task_config_from_flags():
+    config = CONFIG['DEFAULT']
+    for key, value in vars(FLAGS).items():
+        if key in ['config', 'tasks']:
+            continue
+        config[key] = value
+    return config
+
+
+def invoke_task(config):
+    if not config.get('prompts'):
+        print('[!] prompt must be defined in config or on command line, not running pipeline')
         return
 
-    if not CONFIG.get('seed'):
-        CONFIG['seed'] = int.from_bytes(os.urandom(2), 'big')
+    if not config.get('name'):
+        print('[!] --name must be specified in config or on command line, not running pipeline')
+        return
 
-    print('[*] using generator seed:', CONFIG['seed'])
+    if not config.get('seed'):
+        config['seed'] = int.from_bytes(os.urandom(2), 'big')
 
-    local_files_only = not CONFIG.get('download_models')
-    model_path = CONFIG['model']
-    if not CONFIG.get('download_models'):
-        model_path = os.path.expanduser(os.path.join(CONFIG['models_dir'], CONFIG['model']))
+    if FLAGS.dump:
+        print(config)
+        return
+
+    print('[*] using generator seed:', config['seed'])
+
+    local_files_only = not config.get('download_models')
+    model_path = config['model']
+    if not config.get('download_models'):
+        model_path = os.path.expanduser(os.path.join(config['models_dir'], config['model']))
 
     print('[*] preparing diffusion pipeline from', model_path)
 
@@ -104,34 +136,58 @@ def run():
 
     pipe.safety_checker = dummy
 
-    print('[*] executing diffusion pipeline with prompt:', CONFIG['prompts'])
+    print('[*] executing diffusion pipeline with prompt:', config['prompts'])
+    print('[*] images will be written to', config['output_dir'], config['name'])
 
-    if CONFIG.get('negative_prompts'):
-        print('[*] executing with negative prompts:', CONFIG['negative_prompts'])
+    if config.get('negative_prompts'):
+        print('[*] executing with negative prompts:', config['negative_prompts'])
     #print('[*] will generate', FLAGS.num_outputs, 'images per prompt')
 
-    generator = torch.Generator().manual_seed(CONFIG['seed'])
+    generator = torch.Generator().manual_seed(config['seed'])
 
     # Reference pipeline parameters here:
     # https://github.com/huggingface/diffusers/blob/main/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py#L467
     output = pipe(
-            prompt=CONFIG['prompts'],
-            negative_prompt=CONFIG['negative_prompts'],
-            num_images_per_prompt=CONFIG['num_outputs'],
-            num_inference_steps=CONFIG['num_inference_steps'],
-            width=CONFIG['width'],
-            height=CONFIG['height'],
+            prompt=config['prompts'],
+            negative_prompt=config['negative_prompts'],
+            num_images_per_prompt=config['num_outputs'],
+            num_inference_steps=config['num_inference_steps'],
+            width=config['width'],
+            height=config['height'],
             generator=generator,
-            guidance_scale=CONFIG['guidance_scale'],
+            guidance_scale=config['guidance_scale'],
     )
-
     os.makedirs(FLAGS.output_dir, exist_ok=True)
 
     for i, image in enumerate(output.images):
-        output_file = '%s.%d.png' % (CONFIG['name'], i)
-        output_path = os.path.expanduser(os.path.join(CONFIG['output_dir'], output_file))
+        output_file = '%s.%d.png' % (config['name'], i)
+        output_path = os.path.expanduser(os.path.join(config['output_dir'], output_file))
         print('[*] writing image', i, 'to', output_path)
         image.save(output_path)
+
+
+def run():
+    if not FLAGS.prompts and not FLAGS.tasks:
+        print('[!] at least one prompt or one config/task must be provided')
+        return
+
+    if FLAGS.prompts and FLAGS.tasks:
+        print('[!] must provide EITHER prompt arguments OR config/tasks')
+        return
+
+    if len(FLAGS.tasks) > 1 and FLAGS.name:
+        print('[!] flag --name cannot be used with multiple --tasks from config')
+        return
+
+    for task in FLAGS.tasks:
+        print('[*] loaded task from configuration file:', task)
+        config = task_config(task)
+        invoke_task(config)
+
+    if FLAGS.prompts:
+        print('[*] loaded task from command line prompts')
+        config = task_config_from_flags()
+        invoke_task(config)
 
 
 if __name__ == '__main__':

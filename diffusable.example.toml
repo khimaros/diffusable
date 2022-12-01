@@ -14,7 +14,7 @@ num_inference_steps = 25
 #models_dir = "~/src/huggingface.co/"
 
 # diffusion model to use for inference
-#model = "prompthero/openjourney"
+#model = "runwayml/stable-diffusion-v1-5"
 
 # how closely to link images to prompt, higher can reduce image quality
 #guidance_scale = 7

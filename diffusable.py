@@ -16,8 +16,8 @@ parser.add_argument(
         '-n', '--name', type=str,
         help='base file name to use for generated images')
 parser.add_argument(
-        '-m', '--model', type=str, default='prompthero/openjourney',
-        help='diffusion model to use for inference (default: "prompthero/openjourney")')
+        '-m', '--model', type=str, default='runwayml/stable-diffusion-v1-5',
+        help='diffusion model to use for inference (default: "runwayml/stable-diffusion-v1-5")')
 parser.add_argument(
         '-p', '--num_outputs', type=int, default=1,
         help='number of images to generate per prompt (default: 1)')
@@ -100,14 +100,6 @@ def normalize_config(config):
         if flag in config:
             del config[flag]
 
-    if not config.get('prompts'):
-        print('[!] prompt must be defined in config or on command line, not running pipeline')
-        return
-
-    if not config.get('name'):
-        print('[!] --name must be specified in config or on command line, not running pipeline')
-        return
-
 
 def task_config(task):
     config = {}
@@ -152,6 +144,14 @@ def choose_image_path(root, basename):
 
 
 def invoke_task(config):
+    if not config.get('prompts'):
+        print('[!] prompt must be defined in config or on command line, not running pipeline')
+        return
+
+    if not config.get('name'):
+        print('[!] --name must be specified in config or on command line, not running pipeline')
+        return
+
     local_files_only = False
     if not config.get('download_models'):
         model_path = os.path.expanduser(os.path.join(config['models_dir'], config['model']))

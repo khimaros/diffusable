@@ -92,3 +92,9 @@ python ./diffusable.py \
     -t female-elf-portrait \
     -t morgan-freeman-funko
 ```
+
+to run all tasks from the config in sequence:
+
+```shell
+python ./diffusable.py -c ./diffusable.example.toml -a
+```

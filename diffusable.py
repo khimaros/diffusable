@@ -46,6 +46,9 @@ parser.add_argument(
         '-o', '--output_dir', type=str, default='./output/',
         help='directory to write image output (default: "./output/")')
 parser.add_argument(
+        '-a', '--all-tasks', action='store_true',
+        help='run all tasks from the configuration file')
+parser.add_argument(
         '--dump', action='store_true',
         help='dump configuration and exit')
 parser.add_argument(
@@ -62,12 +65,18 @@ FLAGS_SENTINEL_NS = argparse.Namespace(**{ key: FLAGS_SENTINEL for key in vars(F
 parser.parse_args(namespace=FLAGS_SENTINEL_NS)
 EXPLICIT_FLAGS = vars(FLAGS_SENTINEL_NS).items()
 
+CONFIG_SKIP_FLAGS = ('config', 'tasks', 'dump', 'all_tasks')
 CONFIG = {'DEFAULT': {}}
+CONFIG_TASKS = []
 
 if FLAGS.config:
     if os.path.exists(FLAGS.config):
         print('[*] loading configuration from', FLAGS.config)
         CONFIG = toml.load(FLAGS.config)
+    for task in CONFIG:
+        if task == 'DEFAULT': 
+            continue
+        CONFIG_TASKS.append(task)
 
 
 def task_config(task):
@@ -80,7 +89,7 @@ def task_config(task):
 
     # calculate which flags were set explicitly and override config options
     for key, value in EXPLICIT_FLAGS:
-        if key in ['config', 'tasks', 'prompts']:
+        if key in CONFIG_SKIP_FLAGS + ('prompts',):
             continue
         if value is not FLAGS_SENTINEL:
             config[key] = value
@@ -93,7 +102,7 @@ def task_config(task):
 def task_config_from_flags():
     config = CONFIG['DEFAULT']
     for key, value in vars(FLAGS).items():
-        if key in ['config', 'tasks']:
+        if key in CONFIG_SKIP_FLAGS:
             continue
         config[key] = value
     return config
@@ -167,19 +176,23 @@ def invoke_task(config):
 
 
 def run():
-    if not FLAGS.prompts and not FLAGS.tasks:
+    tasks = FLAGS.tasks
+    if FLAGS.all_tasks:
+        tasks = CONFIG_TASKS
+
+    if not FLAGS.prompts and not tasks:
         print('[!] at least one prompt or one config/task must be provided')
         return
 
-    if FLAGS.prompts and FLAGS.tasks:
+    if FLAGS.prompts and tasks:
         print('[!] must provide EITHER prompt arguments OR config/tasks')
         return
 
-    if len(FLAGS.tasks) > 1 and FLAGS.name:
-        print('[!] flag --name cannot be used with multiple --tasks from config')
+    if len(tasks) > 1 and FLAGS.name:
+        print('[!] flag --name cannot be used with multiple tasks from config')
         return
 
-    for task in FLAGS.tasks:
+    for task in tasks:
         print('[*] loaded task from configuration file:', task)
         config = task_config(task)
         invoke_task(config)

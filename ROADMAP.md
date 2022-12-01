@@ -9,6 +9,7 @@
 ## COMPLETE
 
 ```
+[x] flag to run all tasks from config file
 [x] run multiple tasks from configuration file
 [x] override config values using command line flags
 [x] add support for reading prompts from a file

@@ -1,4 +1,4 @@
-# DIFFUSION
+# DIFFUSABLE
 
 ## USAGE
 
@@ -22,7 +22,7 @@ $ git clone --recurse-submodules \
 generate a few images using the default model (`prompthero/openjourney`) and options:
 
 ```shell
-$ python ./diffusion.py \
+$ python ./diffusable.py \
     --name='female-elf-portrait' \
     'mdjrny-v4 style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k'
 ```
@@ -32,7 +32,7 @@ images will be written to `./output/female-elf-portrait.{0,1,2,3}.png`
 to enable automatic fetching of a model from huggingface with a manual seed:
 
 ```shell
-$ python ./diffusion.py \
+$ python ./diffusable.py \
     --download_models \
     --model='prompthero/funko-diffusion' \
     --seed=31911 \
@@ -48,21 +48,21 @@ automatic model downloads will be stored in `~/.cache/huggingface/`
 for more detailed usage, see help:
 
 ```shell
-$ python ./diffusion.py --help
+$ python ./diffusable.py --help
 ```
 
 ## CONFIGURATION
 
-diffusion tasks can be configured in TOML format.
+diffusable tasks can be configured in TOML format.
 
 the config file uses the same keys as the flag names above.
 
-see [diffusion.example.toml](diffusion.example.toml) for an example.
+see [diffusable.example.toml](diffusable.example.toml) for an example.
 
 to execute a task from the config:
 
 ```shell
-$ python ./diffusion.py -t ./diffusion.example.toml female-elf-portrait
+$ python ./diffusable.py -t ./diffusable.example.toml female-elf-portrait
 ```
 
 by default, the TOML section is used as the output name.
@@ -70,5 +70,5 @@ by default, the TOML section is used as the output name.
 you can override config options with flags:
 
 ```shell
-$ python ./diffusion.py -t ./diffusion.example.toml female-elf-portrait -H 768
+$ python ./diffusable.py -t ./diffusable.example.toml female-elf-portrait -H 768
 ```

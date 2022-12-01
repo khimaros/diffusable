@@ -1,0 +1,56 @@
+[DEFAULT]
+
+# number of images to produce per prompt
+#num_outputs = 4
+
+# number of denoising passes, higher produces higher quality
+#num_inference_steps = 50
+num_inference_steps = 25
+
+# output directory for generated images
+#output_dir = "./output/"
+
+# directory to look for model repositories
+#models_dir = "~/src/huggingface.co/"
+
+# diffusion model to use for inference
+#model = "prompthero/openjourney"
+
+# how closely to link images to prompt, higher can reduce image quality
+#guidance_scale = 7
+
+# allow automatic downloading of models
+#download_models = false
+
+# seed to use for generator
+#seed = 0
+
+# width of generated images
+#width = 512
+
+# height of generated images
+#height = 512
+
+
+[female-elf-portrait]
+
+# diffusion model to use for inference
+model = "prompthero/openjourney"
+
+# prompts to generate images from
+prompts = ["mdjrny-v4 style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k"]
+
+
+[morgan-freeman-funko]
+
+# diffusion model to use for inference
+model = "prompthero/funko-diffusion"
+
+# seed to use for generator
+seed = 31911
+
+# number of images to produce per prompt
+num_outputs = 2
+
+# prompts to generate images from
+prompts = ["Morgan Freeman, funko style"]

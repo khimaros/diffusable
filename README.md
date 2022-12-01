@@ -50,3 +50,25 @@ for more detailed usage, see help:
 ```shell
 $ python ./diffusion.py --help
 ```
+
+## CONFIGURATION
+
+diffusion tasks can be configured in TOML format.
+
+the config file uses the same keys as the flag names above.
+
+see [diffusion.example.toml](diffusion.example.toml) for an example.
+
+to execute a task from the config:
+
+```shell
+$ python ./diffusion.py -t ./diffusion.example.toml female-elf-portrait
+```
+
+by default, the TOML section is used as the output name.
+
+you can override config options with flags:
+
+```shell
+$ python ./diffusion.py -t ./diffusion.example.toml female-elf-portrait -H 768
+```

@@ -6,3 +6,4 @@ transformers
 scipyftfy
 accelerate
 tensorboard
+toml

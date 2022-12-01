@@ -1,0 +1,8 @@
+torch
+torchvision
+torchaudio
+diffusers
+transformers
+scipyftfy
+accelerate
+tensorboard

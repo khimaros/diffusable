@@ -19,8 +19,8 @@ parser.add_argument(
         '-m', '--model', type=str, default='prompthero/openjourney',
         help='diffusion model to use for inference (default: "prompthero/openjourney")')
 parser.add_argument(
-        '-p', '--num_outputs', type=int, default=4,
-        help='number of images to generate per prompt (default: 4)')
+        '-p', '--num_outputs', type=int, default=1,
+        help='number of images to generate per prompt (default: 1)')
 parser.add_argument(
         '-i', '--num_inference_steps', type=int, default=50,
         help='number of denoising steps, higher increases quality (default: 50)')

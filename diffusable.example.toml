@@ -1,7 +1,7 @@
 [DEFAULT]
 
 # number of images to produce per prompt
-#num_outputs = 4
+#num_outputs = 1
 
 # number of denoising passes, higher produces higher quality
 #num_inference_steps = 50

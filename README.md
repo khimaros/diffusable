@@ -18,19 +18,20 @@ clone huggingface repositories into `~/src/huggingface.co/`:
 
 ```shell
 git clone --recurse-submodules \
-    https://huggingface.co/prompthero/openjourney/ \
-    ~/src/huggingface.co/prompthero/openjourney/
+    https://huggingface.co/runwayml/stable-diffusion-v1-5/ \
+    ~/src/huggingface.co/runwayml/stable-diffusion-v1-5/
 ```
 
-generate a few images using the default model (`prompthero/openjourney`) and options:
+generate a few images using the default model (`runwayml/stable-diffusion-v1-5`):
 
 ```shell
 python ./diffusable.py \
-    --name='female-elf-portrait' \
-    'mdjrny-v4 style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k'
+    --name='astronaut-rides-horse' \
+    --num_outputs=2 \
+    'a photo of an astronaut riding a horse on mars'
 ```
 
-images will be written to `./output/female-elf-portrait.{0,1,2,3}.png`
+images will be written to `./output/astronaut-rides-horse.0.png`
 
 to enable automatic fetching of a model from huggingface with a manual seed:
 

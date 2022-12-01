@@ -5,7 +5,6 @@
 
 # number of denoising passes, higher produces higher quality
 #num_inference_steps = 50
-num_inference_steps = 25
 
 # output directory for generated images
 #output_dir = "./output/"
@@ -34,6 +33,15 @@ num_inference_steps = 25
 # set default trigger phrase for models
 model_triggers."prompthero/openjourney" = "mdjrny-v4 style"
 model_triggers."prompthero/funko-diffusion" = "funko style"
+
+
+[astronaut-rides-horse]
+
+# diffusion model to use for inference
+model = "runwayml/stable-diffusion-v1-5"
+
+# prompts to generate images from
+prompts = ["a photo of an astronaut riding a horse on mars"]
 
 
 [female-elf-portrait]

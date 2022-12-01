@@ -108,6 +108,17 @@ def task_config_from_flags():
     return config
 
 
+def choose_image_path(root, basename):
+    image_name = None
+    i = 0
+    while True:
+        output_file = '%s.%d.png' % (basename, i)
+        output_path = os.path.expanduser(os.path.join(root, output_file))
+        if not os.path.exists(output_path):
+            return output_path
+        i += 1
+
+
 def invoke_task(config):
     if not config.get('prompts'):
         print('[!] prompt must be defined in config or on command line, not running pipeline')
@@ -146,7 +157,7 @@ def invoke_task(config):
     pipe.safety_checker = dummy
 
     print('[*] executing diffusion pipeline with prompt:', config['prompts'])
-    print('[*] images will be written to', config['output_dir'], config['name'])
+    print('[*] images will be written to', config['output_dir'], 'with base name', config['name'])
 
     if config.get('negative_prompts'):
         print('[*] executing with negative prompts:', config['negative_prompts'])
@@ -168,11 +179,13 @@ def invoke_task(config):
     )
     os.makedirs(FLAGS.output_dir, exist_ok=True)
 
-    for i, image in enumerate(output.images):
-        output_file = '%s.%d.png' % (config['name'], i)
-        output_path = os.path.expanduser(os.path.join(config['output_dir'], output_file))
-        print('[*] writing image', i, 'to', output_path)
+    for image in output.images:
+        output_path = choose_image_path(config['output_dir'], config['name'])
+        print('[*] writing generated image to', output_path)
         image.save(output_path)
+        log_path = output_path + '.nfo'
+        with open(log_path, 'w') as f:
+            f.write(str(config))
 
 
 def run():

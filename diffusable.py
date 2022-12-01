@@ -49,6 +49,9 @@ parser.add_argument(
         '-a', '--all_tasks', action='store_true',
         help='run all tasks from the configuration file')
 parser.add_argument(
+        '-l', '--list_tasks', action='store_true',
+        help='list all tasks from the configuration file')
+parser.add_argument(
         '--dump', action='store_true',
         help='dump configuration and exit')
 parser.add_argument(
@@ -218,6 +221,14 @@ def run():
     tasks = FLAGS.tasks
     if FLAGS.all_tasks:
         tasks = CONFIG_TASKS
+
+    if FLAGS.list_tasks:
+        print('[*] listing available tasks:')
+        print()
+        for task in CONFIG_TASKS:
+            print(task)
+        print()
+        return
 
     if not FLAGS.prompts and not tasks:
         print('[!] at least one prompt or one config/task must be provided')

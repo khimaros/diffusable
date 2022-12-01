@@ -1,6 +1,15 @@
 # DIFFUSABLE
 
- command line utility for working with huggingface diffuser pipelines 
+command line utility for working with huggingface diffuser pipelines
+
+## FEATURES
+
+ - works with or without a GPU for [almost any](MODELS.md) Stable Diffusion derived model
+ - by default runs completely offline, on your local machine
+ - simple TOML configuration file for storing parameters, prompts, and common trigger words
+ - can be configured to auto-download models from HuggingFace
+ - writes all parameters of each image to a text file for future reference
+ - simple and fun command line interface
 
 ## USAGE
 

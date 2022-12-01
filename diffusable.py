@@ -46,11 +46,14 @@ parser.add_argument(
         '-o', '--output_dir', type=str, default='./output/',
         help='directory to write image output (default: "./output/")')
 parser.add_argument(
-        '-a', '--all-tasks', action='store_true',
+        '-a', '--all_tasks', action='store_true',
         help='run all tasks from the configuration file')
 parser.add_argument(
         '--dump', action='store_true',
         help='dump configuration and exit')
+parser.add_argument(
+        '--disable_trigger', action='store_true',
+        help='do not prepend model triggers to prompts')
 parser.add_argument(
         '-x', '--negative_prompts', action='append',
         help='prompts to negate from the generated image')
@@ -79,8 +82,36 @@ if FLAGS.config:
         CONFIG_TASKS.append(task)
 
 
+def normalize_config(config):
+    if not config.get('seed'):
+        config['seed'] = int.from_bytes(os.urandom(2), 'big')
+
+    model_triggers = {}
+    if 'model_triggers' in CONFIG['DEFAULT']:
+        model_triggers = CONFIG['DEFAULT']['model_triggers']
+        del config['model_triggers']
+    trigger = model_triggers.get(config['model'])
+    if trigger and not config['disable_trigger']:
+        print('[*] prepending model trigger to prompts:', trigger)
+        config['prompts'] = [trigger + ' ' + prompt for prompt in config['prompts']]
+    del config['disable_trigger']
+
+    for flag in  CONFIG_SKIP_FLAGS:
+        if flag in config:
+            del config[flag]
+
+    if not config.get('prompts'):
+        print('[!] prompt must be defined in config or on command line, not running pipeline')
+        return
+
+    if not config.get('name'):
+        print('[!] --name must be specified in config or on command line, not running pipeline')
+        return
+
+
 def task_config(task):
-    config = CONFIG['DEFAULT']
+    config = {}
+    config.update(CONFIG['DEFAULT'])
     if task not in CONFIG:
         print('[!] task not found in configuration file:', task)
         return config
@@ -100,7 +131,8 @@ def task_config(task):
 
 
 def task_config_from_flags():
-    config = CONFIG['DEFAULT']
+    config = {}
+    config.update(CONFIG['DEFAULT'])
     for key, value in vars(FLAGS).items():
         if key in CONFIG_SKIP_FLAGS:
             continue
@@ -120,27 +152,21 @@ def choose_image_path(root, basename):
 
 
 def invoke_task(config):
-    if not config.get('prompts'):
-        print('[!] prompt must be defined in config or on command line, not running pipeline')
-        return
-
-    if not config.get('name'):
-        print('[!] --name must be specified in config or on command line, not running pipeline')
-        return
-
-    if not config.get('seed'):
-        config['seed'] = int.from_bytes(os.urandom(2), 'big')
+    local_files_only = False
+    if not config.get('download_models'):
+        model_path = os.path.expanduser(os.path.join(config['models_dir'], config['model']))
+        local_files_only = True
+    else:
+        print('[*] will attempt to download models from huggingface')
+        model_path = config['model']
+    if 'download_models' in config:
+        del config['download_models']
 
     if FLAGS.dump:
         print(config)
         return
 
     print('[*] using generator seed:', config['seed'])
-
-    local_files_only = not config.get('download_models')
-    model_path = config['model']
-    if not config.get('download_models'):
-        model_path = os.path.expanduser(os.path.join(config['models_dir'], config['model']))
 
     print('[*] preparing diffusion pipeline from', model_path)
 
@@ -208,11 +234,13 @@ def run():
     for task in tasks:
         print('[*] loaded task from configuration file:', task)
         config = task_config(task)
+        normalize_config(config)
         invoke_task(config)
 
     if FLAGS.prompts:
         print('[*] loaded task from command line prompts')
         config = task_config_from_flags()
+        normalize_config(config)
         invoke_task(config)
 
 

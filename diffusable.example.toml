@@ -31,6 +31,10 @@ num_inference_steps = 25
 # height of generated images
 #height = 512
 
+# set default trigger phrase for models
+model_triggers."prompthero/openjourney" = "mdjrny-v4 style"
+model_triggers."prompthero/funko-diffusion" = "funko style"
+
 
 [female-elf-portrait]
 
@@ -38,7 +42,7 @@ num_inference_steps = 25
 model = "prompthero/openjourney"
 
 # prompts to generate images from
-prompts = ["mdjrny-v4 style portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k"]
+prompts = ["portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k"]
 
 
 [morgan-freeman-funko]
@@ -53,4 +57,4 @@ seed = 31911
 num_outputs = 2
 
 # prompts to generate images from
-prompts = ["Morgan Freeman, funko style"]
+prompts = ["Morgan Freeman"]

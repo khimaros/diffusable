@@ -98,3 +98,5 @@ to run all tasks from the config in sequence:
 ```shell
 python ./diffusable.py -c ./diffusable.example.toml -a
 ```
+
+to disable any per-model trigger prompts use `--disable_triggers`

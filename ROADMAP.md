@@ -9,6 +9,7 @@
 ## COMPLETE
 
 ```
+[x] support for defining default per-model triggers in config
 [x] automatically choose new image paths to avoid overrwrites
 [x] include a `.nfo` file with the config of each generated image
 [x] flag to run all tasks from config file

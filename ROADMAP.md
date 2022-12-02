@@ -9,6 +9,7 @@
 ## COMPLETE
 
 ```
+[x] add `--repeat` flag for repeating tasks
 [x] support for defining default per-model triggers in config
 [x] automatically choose new image paths to avoid overrwrites
 [x] include a `.nfo` file with the config of each generated image

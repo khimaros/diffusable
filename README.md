@@ -6,6 +6,7 @@ simple command line utility for generating images with HuggingFace diffuser pipe
 
  - works with or without a GPU for [almost any](MODELS.md) Stable Diffusion derived model
  - by default runs completely offline, on your local machine
+ - automate an unlimited sequence of image generation tasks for set-and-forget use
  - simple TOML configuration file for storing parameters, prompts, and common trigger words
  - can be configured to auto-download models from HuggingFace
  - writes all parameters of each image to a text file for future reference
@@ -59,6 +60,8 @@ images will be written to `./output/morgan-freeman-funko.{0,1}.png`
 automatic model downloads will be stored in `~/.cache/huggingface/`
 
 to dump the configuration for inspection, append the `--dump` flag to any command.
+
+to repeat tasks (useful with random seed), use the `--repeat` flag.
 
 for more detailed usage, see help:
 

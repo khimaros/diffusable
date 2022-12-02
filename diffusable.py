@@ -58,6 +58,9 @@ parser.add_argument(
         '--disable_trigger', action='store_true',
         help='do not prepend model triggers to prompts')
 parser.add_argument(
+        '-j', '--repeat', type=int, default=1,
+        help='repeat the specified task this number of times')
+parser.add_argument(
         '-x', '--negative_prompts', action='append',
         help='prompts to negate from the generated image')
 parser.add_argument(
@@ -71,7 +74,7 @@ FLAGS_SENTINEL_NS = argparse.Namespace(**{ key: FLAGS_SENTINEL for key in vars(F
 parser.parse_args(namespace=FLAGS_SENTINEL_NS)
 EXPLICIT_FLAGS = vars(FLAGS_SENTINEL_NS).items()
 
-CONFIG_SKIP_FLAGS = ('config', 'tasks', 'dump', 'all_tasks')
+CONFIG_SKIP_FLAGS = ('config', 'tasks', 'dump', 'all_tasks', 'repeat', 'list_tasks')
 CONFIG = {'DEFAULT': {}}
 CONFIG_TASKS = []
 
@@ -242,17 +245,18 @@ def run():
         print('[!] flag --name cannot be used with multiple tasks from config')
         return
 
-    for task in tasks:
-        print('[*] loaded task from configuration file:', task)
-        config = task_config(task)
-        normalize_config(config)
-        invoke_task(config)
+    for i in range(FLAGS.repeat):
+        for task in tasks:
+            print('[*] loaded task from configuration file:', task)
+            config = task_config(task)
+            normalize_config(config)
+            invoke_task(config)
 
-    if FLAGS.prompts:
-        print('[*] loaded task from command line prompts')
-        config = task_config_from_flags()
-        normalize_config(config)
-        invoke_task(config)
+        if FLAGS.prompts:
+            print('[*] loaded task from command line prompts')
+            config = task_config_from_flags()
+            normalize_config(config)
+            invoke_task(config)
 
 
 if __name__ == '__main__':

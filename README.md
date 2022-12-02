@@ -1,6 +1,6 @@
 # DIFFUSABLE
 
-command line utility for working with huggingface diffuser pipelines
+simple command line utility for generating images with HuggingFace diffuser pipelines (supports CPU inference)
 
 ## FEATURES
 

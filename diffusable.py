@@ -88,14 +88,14 @@ if FLAGS.config:
         CONFIG_TASKS.append(task)
 
 
-def normalize_config(config):
-    if not config.get('seed'):
+def normalize_config(config, random_seed=False):
+    if not config.get('seed') or random_seed:
         config['seed'] = int.from_bytes(os.urandom(2), 'big')
 
     model_triggers = {}
     if 'model_triggers' in CONFIG['DEFAULT']:
         model_triggers = CONFIG['DEFAULT']['model_triggers']
-        del config['model_triggers']
+    del config['model_triggers']
     trigger = model_triggers.get(config['model'])
     if trigger and not config['disable_trigger']:
         print('[*] prepending model trigger to prompts:', trigger)
@@ -245,18 +245,22 @@ def run():
         print('[!] flag --name cannot be used with multiple tasks from config')
         return
 
-    for i in range(FLAGS.repeat):
+    for j in range(FLAGS.repeat):
         for task in tasks:
             print('[*] loaded task from configuration file:', task)
-            config = task_config(task)
-            normalize_config(config)
-            invoke_task(config)
+            repeat = CONFIG[task].get('repeat', 1)
+            for i in range(repeat):
+                config = task_config(task)
+                normalize_config(config, i > 0 or j > 0)
+                invoke_task(config)
 
         if FLAGS.prompts:
             print('[*] loaded task from command line prompts')
-            config = task_config_from_flags()
-            normalize_config(config)
-            invoke_task(config)
+            repeat = FLAGS.repeat
+            for i in range(repeat):
+                config = task_config_from_flags()
+                normalize_config(config, i > 0 or j > 0)
+                invoke_task(config)
 
 
 if __name__ == '__main__':

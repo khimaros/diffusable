@@ -74,7 +74,7 @@ FLAGS_SENTINEL_NS = argparse.Namespace(**{ key: FLAGS_SENTINEL for key in vars(F
 parser.parse_args(namespace=FLAGS_SENTINEL_NS)
 EXPLICIT_FLAGS = vars(FLAGS_SENTINEL_NS).items()
 
-CONFIG_SKIP_FLAGS = ('config', 'tasks', 'dump', 'all_tasks', 'repeat', 'list_tasks')
+CONFIG_SKIP_FLAGS = ('config', 'tasks', 'dump', 'all_tasks', 'repeat', 'list_tasks', 'prompts')
 CONFIG = {'DEFAULT': {}}
 CONFIG_TASKS = []
 
@@ -102,10 +102,6 @@ def normalize_config(config, random_seed=False):
         config['prompts'] = [trigger + ' ' + prompt for prompt in config['prompts']]
     del config['disable_trigger']
 
-    for flag in  CONFIG_SKIP_FLAGS:
-        if flag in config:
-            del config[flag]
-
 
 def task_config(task):
     config = {}
@@ -118,7 +114,7 @@ def task_config(task):
 
     # calculate which flags were set explicitly and override config options
     for key, value in EXPLICIT_FLAGS:
-        if key in CONFIG_SKIP_FLAGS + ('prompts',):
+        if key in CONFIG_SKIP_FLAGS:
             continue
         if value is not FLAGS_SENTINEL:
             config[key] = value
@@ -128,13 +124,14 @@ def task_config(task):
     return config
 
 
-def task_config_from_flags():
+def task_config_from_flags(prompt):
     config = {}
     config.update(CONFIG['DEFAULT'])
     for key, value in vars(FLAGS).items():
         if key in CONFIG_SKIP_FLAGS:
             continue
         config[key] = value
+    config['prompts'] = [prompt]
     return config
 
 
@@ -254,13 +251,11 @@ def run():
                 normalize_config(config, i > 0 or j > 0)
                 invoke_task(config)
 
-        if FLAGS.prompts:
-            print('[*] loaded task from command line prompts')
-            repeat = FLAGS.repeat
-            for i in range(repeat):
-                config = task_config_from_flags()
-                normalize_config(config, i > 0 or j > 0)
-                invoke_task(config)
+        for prompt in FLAGS.prompts:
+            print('[*] loaded task from command line flags')
+            config = task_config_from_flags(prompt)
+            normalize_config(config, j > 0)
+            invoke_task(config)
 
 
 if __name__ == '__main__':

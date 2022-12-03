@@ -1,5 +1,8 @@
 [DEFAULT]
 
+# Default values are commented out below.
+# Uncomment and change to set config wide defaults.
+
 # number of images to produce per prompt
 #num_outputs = 1
 
@@ -30,6 +33,9 @@
 # height of generated images
 #height = 512
 
+# number of repetitions for task
+#repeat = 1
+
 # set default trigger phrase for models
 model_triggers."prompthero/openjourney" = "mdjrny-v4 style"
 model_triggers."prompthero/funko-diffusion" = "funko style"
@@ -48,6 +54,12 @@ prompts = ["a photo of an astronaut riding a horse on mars"]
 
 # diffusion model to use for inference
 model = "prompthero/openjourney"
+
+# seed to use for generator
+seed = 46041
+
+# number of repetitions for task
+repeat = 2
 
 # prompts to generate images from
 prompts = ["portrait of female elf, intricate, elegant, highly detailed, digital painting, artstation, concept art, smooth, sharp focus, illustration, art by artgerm and greg rutkowski and alphonse mucha, 8k"]

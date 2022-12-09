@@ -43,7 +43,7 @@ python ./diffusable.py \
 
 images will be written to `./output/astronaut-rides-horse.0.png`
 
-to enable automatic fetching of a model from huggingface with a manual seed:
+enable automatic fetching of the model from huggingface and use a manual seed:
 
 ```shell
 python ./diffusable.py \
@@ -73,7 +73,7 @@ python ./diffusable.py --help
 
 diffusable tasks can be configured in TOML format.
 
-by default, tasks will be read from `./diffusion.toml` if it exists.
+by default, tasks will be read from `./diffusable.toml` if it exists.
 
 the config file uses the same keys as the flag names above.
 

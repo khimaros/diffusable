@@ -95,7 +95,7 @@ def normalize_config(config, random_seed=False):
     model_triggers = {}
     if 'model_triggers' in CONFIG['DEFAULT']:
         model_triggers = CONFIG['DEFAULT']['model_triggers']
-    del config['model_triggers']
+        del config['model_triggers']
     trigger = model_triggers.get(config['model'])
     if trigger and not config['disable_trigger']:
         print('[*] prepending model trigger to prompts:', trigger)

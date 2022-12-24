@@ -3,7 +3,8 @@ torchvision
 torchaudio
 diffusers
 transformers
-scipyftfy
+scipy
+ftfy
 accelerate
 tensorboard
 toml
